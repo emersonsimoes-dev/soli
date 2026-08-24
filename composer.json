@@ -1,8 +1,8 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "icvb/boletim",
+    "name": "soli/soli",
     "type": "project",
-    "description": "Boletim mensal e gestão da Igreja Congregacional Vale da Benção.",
+    "description": "Soli — boletim e gestão para igrejas.",
     "keywords": ["laravel", "framework"],
     "license": "MIT",
     "require": {

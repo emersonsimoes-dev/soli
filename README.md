@@ -1,8 +1,8 @@
-# Soli — boletim e gestão para a igreja local
+# Soli — boletim e gestão para igrejas
 
-**Soli** (*Soli Deo Gloria* — glória somente a Deus) é um produto de gestão e comunhão para a igreja local. Primeiro cliente: Igreja Congregacional Vale da Benção (ICVB).
+**Soli** (*Soli Deo Gloria* — glória somente a Deus) é o **projeto Soli para igrejas**: boletim, comunhão e gestão, com a identidade da congregação (nome do templo, logo, ministérios) controlada no painel.
 
-A Fase 1 entrega o boletim público do **mês vigente** (timezone `America/Fortaleza`), com a marca Soli no rodapé e a logo da igreja no cabeçalho (ou a Soli como exemplo, até a congregação enviar a própria no painel).
+A Fase 1 entrega o boletim público do **mês vigente** (timezone `America/Fortaleza`). A marca Soli fica no rodapé; o cabeçalho usa a logo da congregação ou a Soli como exemplo, até o cadastro no painel.
 
 Diretrizes completas: [docs/PLANEJAMENTO.md](docs/PLANEJAMENTO.md).
 
@@ -32,15 +32,15 @@ Se o `.env` já existir, pule o `cp`. O `key:generate` só precisa rodar uma vez
 | Site | http://localhost:8000 |
 | Healthcheck | http://localhost:8000/up |
 | Mailpit (e-mail de dev) | http://localhost:8025 |
-| PostgreSQL | `localhost:15432` (user/senha/db: `icvb` / `secret` / `icvb`) |
+| PostgreSQL | `localhost:15432` (user/senha/db: `soli` / `secret` / `soli`) |
 | Redis | `localhost:16379` |
 
 Bancos Postgres no mesmo servidor:
 
 | Ambiente | Database | Quem usa |
 | --- | --- | --- |
-| Desenvolvimento | `icvb` | site, fila, scheduler (`APP_ENV=local`) |
-| Teste | `icvb_test` | só `php artisan test` (`APP_ENV=testing`) |
+| Desenvolvimento | `soli` | site, fila, scheduler (`APP_ENV=local`) |
+| Teste | `soli_test` | só `php artisan test` (`APP_ENV=testing`) |
 
 Timezone da aplicação: **America/Fortaleza**.
 
@@ -59,7 +59,7 @@ docker compose down
 
 Toda fase deve manter `php artisan test` verde. Demandas novas entram com teste (ver [docs/PLANEJAMENTO.md](docs/PLANEJAMENTO.md) § 4.4).
 
-Os testes rodam com `APP_ENV=testing` no banco **`icvb_test`** (Postgres separado). O banco de desenvolvimento `icvb` não é apagado. Cache, sessão e fila de teste usam `array`/`sync`, não o Redis da aplicação.
+Os testes rodam com `APP_ENV=testing` no banco **`soli_test`** (Postgres separado). O banco de desenvolvimento `soli` não é apagado. Cache, sessão e fila de teste usam `array`/`sync`, não o Redis da aplicação.
 
 Branch e commit de cada fase seguem Conventional Commits, com o **slug do título da issue** (ex.: issue #2 → `feat/2-fase-1-boletim-home`). A IA só sugere; o responsável cria a branch e commita (ver [docs/PLANEJAMENTO.md](docs/PLANEJAMENTO.md) § 10).
 

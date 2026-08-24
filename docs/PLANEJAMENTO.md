@@ -3,20 +3,22 @@
 Diretrizes de início do projeto. Este arquivo é a referência de arquitetura, stack, dados, Docker, painel administrativo, auditoria, marca e fases.
 
 **Produto:** Soli (origem: *Soli Deo Gloria* — glória somente a Deus).
-**Primeiro cliente:** Igreja Congregacional Vale da Benção (ICVB).
+**O que é:** projeto Soli para igrejas — gestão e comunhão, configurável por congregação.
 **Tela de origem:** o dashboard público em `resources/legacy-bulletin/` deve ser preservado ao migrar para Blade.
+
+Identidade visual da congregação (nome do templo, logo, ministérios, PIX) **não é o produto**: é dado cadastrado no painel. O produto é sempre Soli.
 
 ---
 
 ## 1. Visão
 
-Soli é um produto de **gestão e comunhão para a igreja local**: nasce como boletim mensal da ICVB e evolui para plataforma configurável, com o mesmo banco servindo o site, o painel e, no futuro, o aplicativo. Identidade completa na seção 1.1.
+Soli é o **projeto Soli para igrejas**: nasce como boletim mensal e evolui para plataforma configurável, com o mesmo banco servindo o site, o painel e, no futuro, o aplicativo. Identidade completa na seção 1.1.
 
 | Horizonte | O que entrega |
 | --- | --- |
 | Agora | Página pública do boletim do **mês vigente** + painel para cadastrar e publicar o mês seguinte, com histórico dos meses anteriores |
-| Depois | O painel vira gestão da igreja (membros, escalas contínuas, finanças, etc.) |
-| Médio prazo | Produto multi-igreja, white-label e configurável |
+| Depois | O painel vira gestão da congregação (membros, escalas contínuas, finanças, etc.) |
+| Médio prazo | Produto white-label e configurável para várias congregações |
 
 **Regra do mês vigente:** timezone `America/Fortaleza`. Em 1º de setembro, o público passa a ver setembro; agosto permanece no histórico e no painel. Administradores podem preparar o boletim de setembro em agosto sem alterar a home.
 
@@ -54,17 +56,18 @@ Arquivos da marca:
 
 | Arquivo | Uso |
 | --- | --- |
-| `mark.png` | Marca principal (recorte do símbolo S + sol). Placeholder da igreja e ícone do rodapé |
+| `mark.png` | Marca principal (recorte do símbolo S + sol). Placeholder da congregação e ícone do rodapé |
 | `lockup.png` | Símbolo + wordmark SOLI em fundo noturno (splash, materiais, exemplo completo) |
 | `mark.svg` | Favicon / app icon (fundo `#0F172A`, traço `#F59E0B`) |
 | `wordmark.svg` | Símbolo + SOLI em SVG, fundo transparente |
 
 Regras de uso:
 
-- A **logo Soli é sempre a imagem de exemplo** do produto. Até a igreja enviar a própria, o cabeçalho usa a Soli.
-- No **site, boletim e páginas públicas**, a Soli como *produto* aparece **só no rodapé** (marca reduzida + nome + slogan). O cabeçalho é da igreja: nome da congregação + logo dela, ou a marca Soli como placeholder enquanto `churches.logo_path` for nulo.
+- A **logo Soli é sempre a imagem de exemplo** do produto. Até a congregação enviar a própria no painel, o cabeçalho usa a Soli.
+- No **site, boletim e páginas públicas**, a Soli como *produto* aparece **só no rodapé** (marca reduzida + nome + slogan). O cabeçalho é da congregação: nome do templo + logo, ou a marca Soli como placeholder enquanto `churches.logo_path` for nulo.
+- Nome do templo, ministérios, PIX e demais textos da congregação vêm do cadastro (`churches` e filhos), não ficam hardcoded no produto.
 - App icon / favicon: fundo `#0F172A` com o “S” dourado `#F59E0B`.
-- O painel (Fase 2) permitirá o upload da logo da igreja ou congregação; `churches.logo_path` vazio continua servindo a Soli.
+- O painel (Fase 2) permite editar o cadastro e o upload da logo; `churches.logo_path` vazio continua servindo a Soli.
 - Configuração em `config/soli.php` (`APP_NAME=Soli`).
 
 ---
@@ -84,7 +87,7 @@ flowchart LR
 - **Público (`/`):** boletim publicado do ano/mês atuais em `America/Fortaleza`. Visual igual ao dashboard atual.
 - **Admin (`/admin`):** Filament. CRUD do boletim, publicação, histórico, usuários, auditoria.
 - **API (`/api/v1`):** JSON a partir do mesmo Postgres, pronta para app ou serviço.
-- **Uma igreja no banco no início**, com `church_id` em todas as entidades de negócio para não refazer o modelo quando o produto for multi-igreja.
+- **Uma congregação no banco no início**, com `church_id` em todas as entidades de negócio para não refazer o modelo quando o produto atender várias congregações.
 
 ---
 
@@ -96,13 +99,13 @@ flowchart LR
 | Framework | Laravel 13 | Versão mais recente com suporte ativo (bugfix até ~Q3 2027, segurança até mar/2028) |
 | Banco | PostgreSQL 17 | Gratuito, JSONB, FKs fortes, adequado a web + API; volume Docker previsível. PostgreSQL 18 mudou o `PGDATA` na imagem oficial e gera atrito desnecessário no início |
 | Cache e fila | Redis | Padrão Laravel, gratuito |
-| Painel admin | Filament 5 | MIT, painel profissional rápido, escala até o ERP da igreja |
+| Painel admin | Filament 5 | MIT, painel profissional rápido, escala até o ERP da congregação |
 | Auth da API | Laravel Sanctum | Tokens para mobile/serviço, sem custo |
 | Auditoria | `spatie/laravel-activitylog` | Quem alterou o quê, quando, com dirty attributes |
 | Permissões | `spatie/laravel-permission` | Papéis `admin` e `editor` no início |
 | Front público | Blade + CSS do boletim | Sem rebuild visual na Fase 1; rodapé Soli |
 | Runtime | Docker Compose | Mesmo ambiente para todos os devs |
-| Testes | PHPUnit 12 (Laravel) | Feature e unitários no Docker, banco **`icvb_test`** isolado do `icvb` de desenvolvimento |
+| Testes | PHPUnit 12 (Laravel) | Feature e unitários no Docker, banco **`soli_test`** isolado do `soli` de desenvolvimento |
 | E-mail local | Mailpit | Só em desenvolvimento, gratuito |
 
 **Proibido no projeto:** Laravel Nova, Firebase pago, e-mail/host/SaaS com cartão, qualquer dependência que exija licença comercial.
@@ -116,7 +119,7 @@ flowchart LR
 **`churches`**
 
 - `id`, `name`, `short_name`, `slug` (unique), `timezone` (default `America/Fortaleza`), `pix_key`, `logo_path` (nullable), `settings` (JSONB), timestamps, soft delete.
-- Seed inicial: ICVB, PIX `50.208.029/0001-31`, `logo_path` nulo (usa marca Soli).
+- Seed inicial: uma congregação de exemplo (nome do templo, PIX, `logo_path` nulo → marca Soli). Tudo isso o painel passa a editar na Fase 2.
 
 **`users`**
 
@@ -127,7 +130,7 @@ flowchart LR
 
 - `church_id` (FK), `year` (int), `month` (1–12), `theme` (nullable), `status` (`draft` \| `published`), `published_at` (nullable), timestamps, soft delete.
 - Unique: `(church_id, year, month)`.
-- Um boletim por igreja por mês.
+- Um boletim por congregação por mês.
 
 **Filhos do boletim** (todos com `bulletin_id`, `sort_order` quando fizer sentido, timestamps e soft delete):
 
@@ -171,9 +174,9 @@ Regras:
 - **Unitários:** timezone Fortaleza, cálculo do mês vigente, KPIs, status `draft`/`published`, constraints de ano/mês.
 - **Feature:** home pública, virada de mês, CRUD/publicação no admin, API `/api/v1/bulletins/current`.
 - Demanda nova ou bugfix só está pronta se o teste correspondente passar no Docker.
-- **Banco de teste isolado**, no mesmo espírito do RSpec/`RAILS_ENV=test`: o PHPUnit usa `APP_ENV=testing` e o Postgres **`icvb_test`**. `RefreshDatabase` recria só esse banco. O banco de desenvolvimento (`icvb`) não é tocado.
+- **Banco de teste isolado**, no mesmo espírito do RSpec/`RAILS_ENV=test`: o PHPUnit usa `APP_ENV=testing` e o Postgres **`soli_test`**. `RefreshDatabase` recria só esse banco. O banco de desenvolvimento (`soli`) não é tocado.
 - Variáveis `DB_*` no `phpunit.xml` usam `force="true"` para não herdar o `.env` local.
-- Testes de domínio puro podem evitar o banco; persistência (Fase 1 em diante) usa `icvb_test` no PostgreSQL, não o sqlite de memória como padrão.
+- Testes de domínio puro podem evitar o banco; persistência (Fase 1 em diante) usa `soli_test` no PostgreSQL, não o sqlite de memória como padrão.
 
 ---
 
@@ -189,7 +192,7 @@ Ações da Fase 2:
 - Listagem por ano/mês, filtro por status, busca por tema.
 - Gestão de usuários e papéis (`admin` apenas).
 - Recurso de **auditoria** (somente leitura): usuário, ação, model, dirty attributes, IP, data.
-- Igreja: edição do cadastro (nome, PIX, timezone) e **upload da logo** da congregação (`churches.logo_path`). Sem logo, o público continua com a marca Soli.
+- Congregação: edição do cadastro (nome do templo, PIX, timezone, ministérios) e **upload da logo** (`churches.logo_path`). Sem logo, o público continua com a marca Soli.
 
 Fluxo típico de setembro, ainda em agosto:
 
@@ -220,7 +223,7 @@ Mesmo Postgres. JSON versionado. Sanctum entra quando houver cliente autenticado
 | `GET` | `/api/v1/bulletins/current` | Mês vigente em `America/Fortaleza` |
 | `GET` | `/api/v1/bulletins/{year}/{month}` | Mês específico publicado (histórico / app) |
 
-Resposta inclui igreja (nome, PIX), tema, programação, eventos, escalas, infantil, EBD, aniversariantes e KPIs derivados.
+Resposta inclui congregação (nome, PIX), tema, programação, eventos, escalas, infantil, EBD, aniversariantes e KPIs derivados.
 
 ---
 
@@ -277,11 +280,13 @@ Acessos locais previstos:
 - Dados vêm do boletim publicado do mês vigente.
 - KPIs calculados no backend ou na view a partir das coleções.
 - Manter hover dos cards, navegação âncora e botão de copiar PIX (PIX vem de `churches.pix_key`).
-- Cabeçalho: logo da igreja ou placeholder Soli. Rodapé: só a Soli (marca + slogan).
+- Cabeçalho: logo da congregação ou placeholder Soli. Rodapé: só a Soli (marca + slogan).
 
 ---
 
 ## 10. Git, branches e acordo
+
+Repositório GitHub do produto: [`emersonsimoes-dev/soli`](https://github.com/emersonsimoes-dev/soli) (renomeado de `boletim-icvb`; o GitHub redireciona a URL antiga).
 
 Toda fase (e demanda relevante) ganha uma issue no GitHub e uma branch própria **antes** do merge em `main`. Nome da branch e mensagem de commit seguem [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/).
 
@@ -291,7 +296,7 @@ Formato: `<tipo>/<numero-da-issue>-<slug-do-titulo-da-issue>`
 
 | Issue | Branch |
 | --- | --- |
-| [Fase 1 - Domínio do boletim + Home #2](https://github.com/emersonsimoes-dev/boletim-icvb/issues/2) | `feat/2-fase-1-boletim-home` |
+| [Fase 1 - Domínio do boletim + Home #2](https://github.com/emersonsimoes-dev/soli/issues/2) | `feat/2-fase-1-boletim-home` |
 | Fase 2 - Painel admin Filament | `feat/<n>-fase-2-admin-filament` |
 | Fase 3 - API v1 | `feat/<n>-fase-3-api-v1` |
 
@@ -334,13 +339,13 @@ Tipos usuais: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`, `build`.
 - README operacional: como subir, URLs, healthcheck.
 - Testes iniciais: home 200, `/up` 200, timezone Fortaleza (`tests/Feature/HealthTest.php`).
 
-### Fase 1 — Domínio do boletim + home (issue [#2](https://github.com/emersonsimoes-dev/boletim-icvb/issues/2), branch `feat/2-fase-1-boletim-home`)
+### Fase 1 — Domínio do boletim + home (issue [#2](https://github.com/emersonsimoes-dev/soli/issues/2), branch `feat/2-fase-1-boletim-home`)
 
 - Identidade do produto Soli (`config/soli.php`, marca em `public/images/soli/`).
 - Migrations e models da seção 4 (`churches.logo_path` nullable).
-- Seed da igreja ICVB (`logo_path` nulo → placeholder Soli) + boletim agosto/2026 publicado.
-- Home pública dinâmica (Blade + CSS do boletim): cabeçalho da igreja, rodapé só da Soli.
-- Testes unitários do mês vigente (incluindo 31/08 → 01/09 em Fortaleza) e feature da home (publicado, rascunho, virada de mês, placeholder vs logo da igreja, rodapé Soli).
+- Seed de uma congregação de exemplo (`logo_path` nulo → placeholder Soli) + boletim agosto/2026 publicado.
+- Home pública dinâmica (Blade + CSS do boletim): cabeçalho da congregação, rodapé só da Soli.
+- Testes unitários do mês vigente (incluindo 31/08 → 01/09 em Fortaleza) e feature da home (publicado, rascunho, virada de mês, placeholder vs logo da congregação, rodapé Soli).
 
 ### Fase 2 — Painel
 
@@ -349,7 +354,7 @@ Tipos usuais: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`, `build`.
 - Publicar / despublicar.
 - Papéis `admin` e `editor`.
 - Auditoria visível no painel.
-- Upload da logo da igreja/congregação.
+- Upload da logo e edição do cadastro da congregação (nome do templo, ministérios).
 - Testes de publicação, permissão (`editor` vs `admin`) e registro de auditoria.
 
 ### Fase 3 — API e notas de produção
@@ -362,8 +367,8 @@ Tipos usuais: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`, `build`.
 ### Depois (produto de gestão)
 
 - Membros, congregações, escalas contínuas, finanças, comunicação.
-- Multi-igreja de verdade (tenancy por `church_id` / domínio / slug).
-- Configuração por igreja via `settings` JSONB e telas Filament.
+- Multi-congregação de verdade (tenancy por `church_id` / domínio / slug).
+- Configuração por congregação via `settings` JSONB e telas Filament.
 - App mobile consumindo a API.
 
 ---
@@ -395,4 +400,4 @@ Tipos usuais: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`, `build`.
 
 Fase 0 concluída (sem issue). Fase 1 na branch `feat/2-fase-1-boletim-home` (issue #2).
 
-Depois do merge da Fase 1: **Fase 2** — painel Filament em `/admin`, publicação do boletim e troca da logo da igreja.
+Depois do merge da Fase 1: **Fase 2** — painel Filament em `/admin`, publicação do boletim e cadastro da congregação (logo, nome do templo, ministérios).
