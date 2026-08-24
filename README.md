@@ -1,10 +1,12 @@
-# ICVB — Boletim mensal
+# Soli — boletim e gestão para a igreja local
 
-Sistema web da Igreja Congregacional Vale da Benção. A Fase 0 entrega o esqueleto **Laravel 13 + PHP 8.4 + PostgreSQL 17 + Redis**, já no Docker, para qualquer dev subir o mesmo ambiente.
+**Soli** (*Soli Deo Gloria* — glória somente a Deus) é um produto de gestão e comunhão para a igreja local. Primeiro cliente: Igreja Congregacional Vale da Benção (ICVB).
+
+A Fase 1 entrega o boletim público do **mês vigente** (timezone `America/Fortaleza`), com a marca Soli no rodapé e a logo da igreja no cabeçalho (ou a Soli como exemplo, até a congregação enviar a própria no painel).
 
 Diretrizes completas: [docs/PLANEJAMENTO.md](docs/PLANEJAMENTO.md).
 
-O dashboard estático original ficou em `resources/legacy-bulletin/` e será ligado aos dados na Fase 1.
+O dashboard estático original ficou em `resources/legacy-bulletin/`.
 
 ## Requisitos
 
@@ -18,7 +20,7 @@ cp .env.example .env
 docker compose up -d --build
 docker compose exec app composer install
 docker compose exec app php artisan key:generate
-docker compose exec app php artisan migrate
+docker compose exec app php artisan migrate --seed
 ```
 
 Se o `.env` já existir, pule o `cp`. O `key:generate` só precisa rodar uma vez.
@@ -48,6 +50,7 @@ Dentro da rede Docker, a aplicação usa `postgres:5432` e `redis:6379`. As port
 
 ```bash
 docker compose exec app php artisan migrate
+docker compose exec app php artisan db:seed
 docker compose exec app php artisan test
 docker compose exec app php artisan tinker
 docker compose logs -f nginx app queue
@@ -58,7 +61,7 @@ Toda fase deve manter `php artisan test` verde. Demandas novas entram com teste 
 
 Os testes rodam com `APP_ENV=testing` no banco **`icvb_test`** (Postgres separado). O banco de desenvolvimento `icvb` não é apagado. Cache, sessão e fila de teste usam `array`/`sync`, não o Redis da aplicação.
 
-Branch e commit de cada fase seguem Conventional Commits, com o **slug do título da issue** (ex.: issue #2 → `feat/fase-1-boletim-home`). A IA só sugere; o responsável cria a branch e commita (ver [docs/PLANEJAMENTO.md](docs/PLANEJAMENTO.md) § 10).
+Branch e commit de cada fase seguem Conventional Commits, com o **slug do título da issue** (ex.: issue #2 → `feat/2-fase-1-boletim-home`). A IA só sugere; o responsável cria a branch e commita (ver [docs/PLANEJAMENTO.md](docs/PLANEJAMENTO.md) § 10).
 
 Dados do Postgres ficam no volume Docker `postgres_data`. `docker compose down -v` apaga o banco.
 
