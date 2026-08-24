@@ -1,0 +1,382 @@
+from weasyprint import HTML
+
+html_content = """<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<style>
+  @page {
+    size: A4;
+    margin: 12mm;
+    background-color: #f8fafc;
+  }
+  
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: #1e293b;
+    margin: 0;
+    padding: 0;
+    background-color: #f8fafc;
+    font-size: 10.5pt;
+    line-height: 1.35;
+  }
+
+  /* Header Section */
+  .header-card {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+    color: #ffffff;
+    padding: 18px 24px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  .header-title {
+    font-size: 20pt;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 4px 0;
+    text-align: center;
+  }
+
+  .header-subtitle {
+    font-size: 12pt;
+    text-align: center;
+    color: #93c5fd;
+    font-weight: 600;
+    margin: 0 0 12px 0;
+  }
+
+  .header-info-table {
+    width: 100%;
+    margin-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    padding-top: 10px;
+  }
+
+  .header-info-table td {
+    color: #f1f5f9;
+    font-size: 9.5pt;
+    padding: 2px 0;
+    border: none;
+  }
+
+  .pix-box {
+    background-color: rgba(255, 255, 255, 0.15);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: 600;
+    display: inline-block;
+  }
+
+  /* Section Titles */
+  .section-title {
+    font-size: 12pt;
+    font-weight: 700;
+    color: #1e3a8a;
+    margin: 14px 0 8px 0;
+    padding-left: 10px;
+    border-left: 4px solid #2563eb;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    page-break-after: avoid;
+  }
+
+  /* Cards Grid Layout (Table based for WeasyPrint) */
+  .grid-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 10px 0;
+    margin: 0 -10px 12px -10px;
+  }
+
+  .grid-cell {
+    vertical-align: top;
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 12px 14px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+
+  /* List Styling */
+  .event-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .event-list li {
+    padding: 5px 0;
+    border-bottom: 1px dashed #f1f5f9;
+    font-size: 9.5pt;
+  }
+
+  .event-list li:last-child {
+    border-bottom: none;
+  }
+
+  .badge {
+    background-color: #dbeafe;
+    color: #1e40af;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 8.5pt;
+    margin-right: 4px;
+  }
+
+  .badge-highlight {
+    background-color: #fef3c7;
+    color: #92400e;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 8.5pt;
+  }
+
+  /* Styled Tables */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 12px;
+    font-size: 9pt;
+  }
+
+  .data-table th {
+    background-color: #1e3a8a;
+    color: #ffffff;
+    font-weight: 700;
+    text-align: left;
+    padding: 7px 10px;
+    font-size: 8.5pt;
+    text-transform: uppercase;
+  }
+
+  .data-table td {
+    padding: 7px 10px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+  }
+
+  .data-table tr:nth-child(even) td {
+    background-color: #f8fafc;
+  }
+
+  .data-table tr:hover td {
+    background-color: #f1f5f9;
+  }
+
+  /* Birthday Badge Grid */
+  .bday-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 6px;
+  }
+
+  .bday-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 6px 10px;
+    text-align: center;
+    font-size: 9pt;
+  }
+
+  .bday-day {
+    font-weight: 800;
+    color: #2563eb;
+    font-size: 11pt;
+    display: block;
+  }
+
+  .bday-name {
+    color: #334155;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+  <!-- Header Banner -->
+  <div class="header-card">
+    <div class="header-title">BOLETIM MENSAL & DASHBOARD</div>
+    <div class="header-subtitle">Igreja Congregacional Vale da Benção — Agosto 2026</div>
+    <table class="header-info-table">
+      <tr>
+        <td style="width: 45%;"><strong>Tema do Mês:</strong> Igreja em Ação 🔥</td>
+        <td style="width: 55%; text-align: right;">
+          <span class="pix-box">🔑 PIX: 50.208.029/0001-31</span>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Programacao & Eventos Grid -->
+  <table class="grid-table">
+    <tr>
+      <td class="grid-cell" style="width: 50%;">
+        <div class="section-title" style="margin-top:0;">📅 Programação Semanal</div>
+        <ul class="event-list">
+          <li><span class="badge">DOM 02</span> 08:00 & 09:30 - Culto e Jardim de Oração 🙏</li>
+          <li><span class="badge">DOMINGOS</span> 17:00 EBD 📓 | 19:00 Culto 🙏</li>
+          <li><span class="badge-highlight">DOM 30</span> 19:00 Santa Ceia 🍷🥖🔥</li>
+          <li><span class="badge">SEGUNDA</span> Cristo nos Lares – Cocó 🏡</li>
+          <li><span class="badge">TERÇA</span> Oração Campo Missionário – Itaitinga 🙏</li>
+          <li><span class="badge">QUARTA</span> Estudo Bíblico e Oração nas Congregações</li>
+          <li><span class="badge">QUINTA</span> Cristo nos Lares – Montese 🏡</li>
+          <li><span class="badge">SEXTA</span> Cristo nos Lares – Parreão 🏡</li>
+        </ul>
+      </td>
+      <td class="grid-cell" style="width: 50%;">
+        <div class="section-title" style="margin-top:0;">🌟 Destaques & Eventos Especiais</div>
+        <ul class="event-list">
+          <li><span class="badge-highlight">SÁB 08</span> <strong>Bazar da Ação Social</strong> 🛒</li>
+          <li><span class="badge-highlight">QUA 26</span> <strong>Culto Especial de Homens e Mulheres</strong> 👨‍👩‍👧‍👦</li>
+          <li><span class="badge-highlight">SÁB 22</span> <strong>171 anos de Congregacionalismo no Brasil</strong> 🇧🇷🎉</li>
+          <li><span class="badge-highlight">SÁB 29</span> <strong>Encontro de Mulheres (Itaitinga)</strong> 👩🏻🔥</li>
+        </ul>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Escala de Servir -->
+  <div class="section-title">🤝 Escala de Servir ao Senhor (Domingos)</div>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th style="width: 10%; text-align: center;">Data</th>
+        <th style="width: 18%;">Introdutores</th>
+        <th style="width: 16%;">Ofertório</th>
+        <th style="width: 18%;">Dirigentes</th>
+        <th style="width: 22%;">Pregadores</th>
+        <th style="width: 16%;">Lanche / Apoio</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="text-align: center; font-weight: bold; color: #2563eb;">02/08</td>
+        <td>José de Freitas</td>
+        <td>Pb. Mardilson</td>
+        <td>Ev. Jackson</td>
+        <td>Pr. Fernando Fernandes</td>
+        <td>Marcilene / Marcilene</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: bold; color: #2563eb;">09/08</td>
+        <td>Ev. Jackson</td>
+        <td>Diác. Hugo</td>
+        <td>Ruth</td>
+        <td>Miss. Alda</td>
+        <td>Regina / Antônia</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: bold; color: #2563eb;">16/08</td>
+        <td>Dc. Hugo</td>
+        <td>Ev. Jackson</td>
+        <td>Pb. Mardilson</td>
+        <td>Pr. Nay</td>
+        <td>Amanda / Marcilene</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: bold; color: #2563eb;">23/08</td>
+        <td>Pb. Mardilson</td>
+        <td>Beth</td>
+        <td>Pr. Fernando Fernandes</td>
+        <td>Pr. Josival (IEC Guarabira)</td>
+        <td>Ruth / Antônia</td>
+      </tr>
+      <tr>
+        <td style="text-align: center; font-weight: bold; color: #2563eb;">30/08</td>
+        <td>Nogueira</td>
+        <td>Cícera</td>
+        <td>Diác. Marcos Penha</td>
+        <td>Pr. Fernando Fernandes</td>
+        <td>Beth / Marcilene</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Ministério Infantil & EBD Grid -->
+  <table class="grid-table">
+    <tr>
+      <td class="grid-cell" style="width: 50%;">
+        <div class="section-title" style="margin-top:0;">👶🏻 Culto Infantil</div>
+        <table class="data-table" style="margin-bottom:0;">
+          <thead>
+            <tr>
+              <th style="text-align:center;">Data</th>
+              <th>Berçário (0-5 anos)</th>
+              <th>Primário (6-10 anos)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td style="text-align:center; font-weight:bold;">02/08</td><td>Isabel</td><td>Marli</td></tr>
+            <tr><td style="text-align:center; font-weight:bold;">09/08</td><td>Catarina</td><td>Cira</td></tr>
+            <tr><td style="text-align:center; font-weight:bold;">16/08</td><td>Marta</td><td>Beth</td></tr>
+            <tr><td style="text-align:center; font-weight:bold;">23/08</td><td>Cira</td><td>Clara</td></tr>
+            <tr><td style="text-align:center; font-weight:bold;">30/08</td><td>Paula</td><td>Fabíola</td></tr>
+          </tbody>
+        </table>
+      </td>
+      <td class="grid-cell" style="width: 50%;">
+        <div class="section-title" style="margin-top:0;">📓 Professores EBD</div>
+        <table class="data-table" style="margin-bottom:0;">
+          <thead>
+            <tr>
+              <th>Classe</th>
+              <th>Professor(a) / Escala</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Berçário</strong></td><td>Zuíla</td></tr>
+            <tr><td><strong>Primário</strong></td><td>Amanda</td></tr>
+            <tr><td><strong>Juniores</strong></td><td>Francisca</td></tr>
+            <tr><td><strong>Rei Davi</strong></td><td>Emerson</td></tr>
+            <tr><td><strong>Logos</strong></td><td>02: Miss. Alda | 09: Ruth | 16: Diác. Marcos | 23: Miss. Alda | 30: Pr. Nay</td></tr>
+            <tr><td><strong>Bereanos</strong></td><td>02: Pb. Mardilson | 09: Nogueira | 16: Marilene | 23: Pr. Nay | 30: Miss. Alda</td></tr>
+          </tbody>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Aniversariantes -->
+  <div class="section-title">🎂 Aniversariantes do Mês de Agosto</div>
+  <table class="bday-table">
+    <tr>
+      <td style="width: 20%;"><div class="bday-card"><span class="bday-day">06</span><span class="bday-name">Cecy</span></div></td>
+      <td style="width: 20%;"><div class="bday-card"><span class="bday-day">08</span><span class="bday-name">Robson</span></div></td>
+      <td style="width: 20%;"><div class="bday-card"><span class="bday-day">09</span><span class="bday-name">Yasmin</span></div></td>
+      <td style="width: 20%;"><div class="bday-card"><span class="bday-day">09</span><span class="bday-name">Alvan</span></div></td>
+      <td style="width: 20%;"><div class="bday-card"><span class="bday-day">20</span><span class="bday-name">Antoniel</span></div></td>
+    </tr>
+    <tr>
+      <td style="width: 20%;"><div class="bday-card"><span class="bday-day">24</span><span class="bday-name">Valdiana</span></div></td>
+      <td style="width: 20%;"><div class="bday-card"><span class="bday-day">26</span><span class="bday-name">Ester</span></div></td>
+      <td style="width: 20%;"><div class="bday-card"><span class="bday-day">27</span><span class="bday-name">Regis Tavares</span></div></td>
+      <td style="width: 20%;"><div class="bday-card"><span class="bday-day">29</span><span class="bday-name">Marcilene</span></div></td>
+      <td style="width: 20%;"><div class="bday-card"><span class="bday-day">29</span><span class="bday-name">Cristiani Campelo</span></div></td>
+    </tr>
+  </table>
+
+</body>
+</html>
+"""
+
+# Save HTML file
+with open("Dashboard_Boletim_Agosto_2026.html", "w", encoding="utf-8") as f:
+    f.write(html_content)
+
+# Render PDF using WeasyPrint
+HTML(string=html_content).write_pdf("Dashboard_Boletim_Agosto_2026.pdf")
+print("HTML and PDF Dashboard successfully generated!")
