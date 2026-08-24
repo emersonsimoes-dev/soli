@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsSoliActivity;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 #[Fillable(['bulletin_id', 'service_date', 'introducers', 'offertory', 'leaders', 'preachers', 'support', 'sort_order'])]
 class ServiceRoster extends Model
 {
-    use SoftDeletes;
+    use LogsSoliActivity, SoftDeletes;
 
     protected function casts(): array
     {

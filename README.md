@@ -2,7 +2,7 @@
 
 **Soli** (*Soli Deo Gloria* — glória somente a Deus) é o **projeto Soli para igrejas**: boletim, comunhão e gestão, com a identidade da congregação (nome do templo, logo, ministérios) controlada no painel.
 
-A Fase 1 entrega o boletim público do **mês vigente** (timezone `America/Fortaleza`). A marca Soli fica no rodapé; o cabeçalho usa a logo da congregação ou a Soli como exemplo, até o cadastro no painel.
+A Fase 1 entrega o boletim público do **mês vigente** (timezone `America/Fortaleza`). A Fase 2 entrega o painel `/admin` (Filament) para cadastrar, publicar e auditar boletins, além do cadastro da congregação.
 
 Diretrizes completas: [docs/PLANEJAMENTO.md](docs/PLANEJAMENTO.md).
 
@@ -21,6 +21,7 @@ docker compose up -d --build
 docker compose exec app composer install
 docker compose exec app php artisan key:generate
 docker compose exec app php artisan migrate --seed
+docker compose exec app php artisan storage:link
 ```
 
 Se o `.env` já existir, pule o `cp`. O `key:generate` só precisa rodar uma vez.
@@ -30,6 +31,7 @@ Se o `.env` já existir, pule o `cp`. O `key:generate` só precisa rodar uma vez
 | Serviço | URL |
 | --- | --- |
 | Site | http://localhost:8000 |
+| Admin | http://localhost:8000/admin |
 | Healthcheck | http://localhost:8000/up |
 | Mailpit (e-mail de dev) | http://localhost:8025 |
 | PostgreSQL | `localhost:15432` (user/senha/db: `soli` / `secret` / `soli`) |
@@ -67,15 +69,22 @@ Dados do Postgres ficam no volume Docker `postgres_data`. `docker compose down -
 
 ## Acesso administrativo
 
-O painel `/admin` entra na **Fase 2** (Filament). Quando existir:
+O painel Filament fica em `/admin`. Depois do seed (papéis `admin` e `editor`), crie o primeiro usuário:
 
 ```bash
 docker compose exec app php artisan make:filament-user
 ```
 
-Papéis previstos: `admin` (tudo) e `editor` (boletins). Auditoria de alterações também é Fase 2.
+O primeiro usuário recebe o papel `admin` automaticamente. Os demais são criados no próprio painel, em **Usuários**.
 
-Até lá, o critério de saúde do stack é `GET /up` retornar HTTP 200.
+Papéis:
+
+- `admin` — boletins, congregação, usuários e auditoria
+- `editor` — boletins, congregação e consulta da auditoria (sem gerir usuários)
+
+A auditoria registra criações, alterações, exclusões e publicações, com usuário, campos alterados, IP e user-agent. Os logs não podem ser editados nem apagados pela interface.
+
+Uploads da logo da congregação usam o disco `public`. O `storage:link` precisa existir para a logo aparecer no site.
 
 ## Produção (resumo)
 
@@ -91,9 +100,11 @@ Detalhamento completo na Fase 3. Para um VPS com Docker:
 ## Stack desta fase
 
 - Laravel 13 / PHP 8.4-FPM
+- Filament 5 (`/admin`)
 - Nginx
 - PostgreSQL 17
 - Redis 7 (cache, sessão e fila)
 - Mailpit (somente desenvolvimento)
+- Spatie Permission (`admin`, `editor`) e Activitylog
 
 Nada nesta stack é pago.
