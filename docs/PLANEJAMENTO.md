@@ -26,6 +26,8 @@ Princípios:
 - Auditoria completa de criações, alterações, exclusões e publicações.
 - Um único PostgreSQL para web, admin e API.
 - Docker desde o primeiro commit da Fase 0, para qualquer dev subir o mesmo ambiente.
+- **Testes desde o início.** Nenhuma demanda entra sem teste que a cubra (unitário e/ou de feature). Código sem teste não está pronto.
+- **Git só com acordo.** Branch e commit seguem Conventional Commits. A IA **sugere** nome e mensagem; não cria branch, não commita e não dá push até o responsável concordar ou executar manualmente.
 
 ---
 
@@ -62,6 +64,7 @@ flowchart LR
 | Permissões | `spatie/laravel-permission` | Papéis `admin` e `editor` no início |
 | Front público | Blade + CSS atual (`css/styles.css`) | Sem rebuild visual na Fase 1 |
 | Runtime | Docker Compose | Mesmo ambiente para todos os devs |
+| Testes | PHPUnit 12 (Laravel) | Feature e unitários no Docker, banco **`icvb_test`** isolado do `icvb` de desenvolvimento |
 | E-mail local | Mailpit | Só em desenvolvimento, gratuito |
 
 **Proibido no projeto:** Laravel Nova, Firebase pago, e-mail/host/SaaS com cartão, qualquer dependência que exija licença comercial.
@@ -115,6 +118,24 @@ Os KPIs da home (8, 4, 5, 10) são **calculados** a partir dessas coleções, n�
 - Validação no Filament e Form Requests na API.
 - Soft delete em entidades de negócio.
 - Seed obrigatório do boletim de **agosto/2026** (conteúdo atual do `index.html`), já publicado, para a home nascer preenchida.
+
+### 4.4 Testes (obrigatório em todas as fases)
+
+O projeto **começa e continua com testes**. PHPUnit já entra na Fase 0 (`tests/Feature`, `tests/Unit`). Rodar:
+
+```bash
+docker compose exec app php artisan test
+```
+
+Regras:
+
+- Toda regra de negócio nasce com teste **antes ou junto** da implementação, nunca depois “se der tempo”.
+- **Unitários:** timezone Fortaleza, cálculo do mês vigente, KPIs, status `draft`/`published`, constraints de ano/mês.
+- **Feature:** home pública, virada de mês, CRUD/publicação no admin, API `/api/v1/bulletins/current`.
+- Demanda nova ou bugfix só está pronta se o teste correspondente passar no Docker.
+- **Banco de teste isolado**, no mesmo espírito do RSpec/`RAILS_ENV=test`: o PHPUnit usa `APP_ENV=testing` e o Postgres **`icvb_test`**. `RefreshDatabase` recria só esse banco. O banco de desenvolvimento (`icvb`) não é tocado.
+- Variáveis `DB_*` no `phpunit.xml` usam `force="true"` para não herdar o `.env` local.
+- Testes de domínio puro podem evitar o banco; persistência (Fase 1 em diante) usa `icvb_test` no PostgreSQL, não o sqlite de memória como padrão.
 
 ---
 
@@ -221,7 +242,40 @@ Acessos locais previstos:
 
 ---
 
-## 10. Fases
+## 10. Git, branches e acordo
+
+Toda fase (e demanda relevante) ganha uma branch própria **antes** do merge em `main`. Nome da branch e mensagem de commit seguem [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/).
+
+**Branch:** `<tipo>/fase-<n>-<escopo-curto>`
+
+Exemplos:
+
+- `feat/fase-0-bootstrap-docker`
+- `feat/fase-1-boletim-home`
+- `feat/fase-2-admin-filament`
+- `feat/fase-3-api-v1`
+- `docs/fase-0-planejamento` (só documentação)
+- `fix/fase-1-virada-de-mes`
+
+**Commit:**
+
+```text
+<tipo>(<escopo>): <descrição curta>
+
+[corpo opcional com o porquê]
+```
+
+Tipos usuais: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`, `build`.
+
+**Acordo obrigatório**
+
+- A IA **não** cria branch, **não** executa `git commit`, **não** faz `git push` e **não** abre PR por conta própria.
+- Ela **sugere** o nome da branch e a mensagem; o responsável confirma ou roda os comandos manualmente.
+- Qualquer outra ação destrutiva ou de publicação (force push, merge, deploy) também espera acordo explícito.
+
+---
+
+## 11. Fases
 
 ### Esta etapa (concluída por este arquivo)
 
@@ -233,13 +287,14 @@ Acessos locais previstos:
 - `.env.example`, timezone `America/Fortaleza`.
 - README operacional: como subir, URLs, primeiro usuário.
 - Healthcheck básico.
+- Testes iniciais: home 200, `/up` 200, timezone Fortaleza (`tests/Feature/HealthTest.php`).
 
 ### Fase 1 — Domínio do boletim + home
 
 - Migrations e models da seção 4.
 - Seed da igreja ICVB + boletim agosto/2026 publicado.
 - Home pública dinâmica (Blade + CSS atual).
-- Testes de “mês vigente” com timezone Fortaleza (incluindo virada de mês).
+- Testes unitários do mês vigente (incluindo 31/08 → 01/09 em Fortaleza) e feature da home com/sem boletim publicado.
 
 ### Fase 2 — Painel
 
@@ -248,12 +303,14 @@ Acessos locais previstos:
 - Publicar / despublicar.
 - Papéis `admin` e `editor`.
 - Auditoria visível no painel.
+- Testes de publicação, permissão (`editor` vs `admin`) e registro de auditoria.
 
 ### Fase 3 — API e notas de produção
 
 - `GET /api/v1/bulletins/current` e `GET /api/v1/bulletins/{year}/{month}`.
 - Sanctum instalado (pronto para o app).
 - Documentar produção no README (HTTPS, backup, workers, secrets).
+- Testes de feature dos endpoints (mês vigente, mês histórico, 404 se não publicado).
 
 ### Depois (produto de gestão)
 
@@ -264,7 +321,7 @@ Acessos locais previstos:
 
 ---
 
-## 11. Fora de escopo agora
+## 12. Fora de escopo agora
 
 - Multi-tenant completo (subdomínios, billing, isolation avançada).
 - Aplicativo mobile.
@@ -275,9 +332,10 @@ Acessos locais previstos:
 
 ---
 
-## 12. Critérios de pronto da primeira entrega útil (Fases 0–2)
+## 13. Critérios de pronto da primeira entrega útil (Fases 0–2)
 
 - `docker compose up` sobe o sistema em máquina limpa com Docker.
+- `php artisan test` passa no Docker, cobrindo as regras entregues na fase.
 - `/` mostra o boletim de agosto/2026 enquanto a data em Fortaleza for agosto/2026.
 - Em setembro, `/` não mostra agosto; mostra setembro se publicado, senão estado vazio.
 - `/admin` permite criar o boletim do mês seguinte, publicar, e consultar o histórico.
@@ -286,6 +344,6 @@ Acessos locais previstos:
 
 ---
 
-## 13. Próximo passo
+## 14. Próximo passo
 
 Com este documento aprovado, a implementação começa pela **Fase 0**: esqueleto Laravel 13 + Docker + PostgreSQL 17 + Redis, e README de bootstrap para outros devs.
