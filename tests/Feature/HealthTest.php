@@ -10,7 +10,7 @@ class HealthTest extends TestCase
     {
         $this->get('/')
             ->assertOk()
-            ->assertSee('ICVB no ar', false);
+            ->assertSee('SOLI');
     }
 
     public function test_health_endpoint_is_available(): void

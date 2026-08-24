@@ -1,15 +1,16 @@
-# Planejamento do produto ICVB
+# Planejamento do produto Soli
 
-Diretrizes de início do projeto. Este arquivo é a referência de arquitetura, stack, dados, Docker, painel administrativo, auditoria e fases. A implementação Laravel começa **depois** da aprovação deste documento.
+Diretrizes de início do projeto. Este arquivo é a referência de arquitetura, stack, dados, Docker, painel administrativo, auditoria, marca e fases.
 
+**Produto:** Soli (origem: *Soli Deo Gloria* — glória somente a Deus).
 **Primeiro cliente:** Igreja Congregacional Vale da Benção (ICVB).
-**Tela de origem:** o dashboard público atual em `index.html` + `css/styles.css` deve ser preservado ao migrar para Blade.
+**Tela de origem:** o dashboard público em `resources/legacy-bulletin/` deve ser preservado ao migrar para Blade.
 
 ---
 
 ## 1. Visão
 
-O projeto nasce como **boletim mensal da ICVB** e deve evoluir para um **produto de gestão para igrejas**, configurável, com o mesmo banco servindo o site, o painel e, no futuro, aplicativo mobile ou outros serviços.
+Soli é um produto de **gestão e comunhão para a igreja local**: nasce como boletim mensal da ICVB e evolui para plataforma configurável, com o mesmo banco servindo o site, o painel e, no futuro, o aplicativo. Identidade completa na seção 1.1.
 
 | Horizonte | O que entrega |
 | --- | --- |
@@ -28,6 +29,43 @@ Princípios:
 - Docker desde o primeiro commit da Fase 0, para qualquer dev subir o mesmo ambiente.
 - **Testes desde o início.** Nenhuma demanda entra sem teste que a cubra (unitário e/ou de feature). Código sem teste não está pronto.
 - **Git só com acordo.** Branch e commit seguem Conventional Commits. A IA **sugere** nome e mensagem; não cria branch, não commita e não dá push até o responsável concordar ou executar manualmente.
+
+### 1.1 Marca, logo e white-label
+
+| Token | Valor |
+| --- | --- |
+| Nome | Soli |
+| Origem | *Soli Deo Gloria* — glória somente a Deus |
+| Essência | Minimalismo, autoridade, solidez, tecnologia limpa |
+| Personalidade | Sólido, corporativo, seguro, premium; soa como software de alta performance |
+| Azul noturno | `#0F172A` |
+| Amarelo sol / dourado muted | `#F59E0B` |
+| Símbolo | “S” em linha contínua, com sol nascente (semi-círculo + raios) no topo da letra e curva fluida embaixo. Geométrico, estilo Stripe/Notion |
+| Logo padrão | `public/images/soli/` |
+
+Slogans (usar conforme o contexto; o **padrão do rodapé público** é o primeiro):
+
+1. Soli: Conectando a igreja. Honrando a missão.
+2. Soli: Gestão e comunhão na palma da mão.
+3. Soli: Tecnologia para a igreja local.
+4. Soli: Glória a Deus em cada detalhe da sua igreja.
+
+Arquivos da marca:
+
+| Arquivo | Uso |
+| --- | --- |
+| `mark.png` | Marca principal (recorte do símbolo S + sol). Placeholder da igreja e ícone do rodapé |
+| `lockup.png` | Símbolo + wordmark SOLI em fundo noturno (splash, materiais, exemplo completo) |
+| `mark.svg` | Favicon / app icon (fundo `#0F172A`, traço `#F59E0B`) |
+| `wordmark.svg` | Símbolo + SOLI em SVG, fundo transparente |
+
+Regras de uso:
+
+- A **logo Soli é sempre a imagem de exemplo** do produto. Até a igreja enviar a própria, o cabeçalho usa a Soli.
+- No **site, boletim e páginas públicas**, a Soli como *produto* aparece **só no rodapé** (marca reduzida + nome + slogan). O cabeçalho é da igreja: nome da congregação + logo dela, ou a marca Soli como placeholder enquanto `churches.logo_path` for nulo.
+- App icon / favicon: fundo `#0F172A` com o “S” dourado `#F59E0B`.
+- O painel (Fase 2) permitirá o upload da logo da igreja ou congregação; `churches.logo_path` vazio continua servindo a Soli.
+- Configuração em `config/soli.php` (`APP_NAME=Soli`).
 
 ---
 
@@ -62,7 +100,7 @@ flowchart LR
 | Auth da API | Laravel Sanctum | Tokens para mobile/serviço, sem custo |
 | Auditoria | `spatie/laravel-activitylog` | Quem alterou o quê, quando, com dirty attributes |
 | Permissões | `spatie/laravel-permission` | Papéis `admin` e `editor` no início |
-| Front público | Blade + CSS atual (`css/styles.css`) | Sem rebuild visual na Fase 1 |
+| Front público | Blade + CSS do boletim | Sem rebuild visual na Fase 1; rodapé Soli |
 | Runtime | Docker Compose | Mesmo ambiente para todos os devs |
 | Testes | PHPUnit 12 (Laravel) | Feature e unitários no Docker, banco **`icvb_test`** isolado do `icvb` de desenvolvimento |
 | E-mail local | Mailpit | Só em desenvolvimento, gratuito |
@@ -77,8 +115,8 @@ flowchart LR
 
 **`churches`**
 
-- `id`, `name`, `slug` (unique), `timezone` (default `America/Fortaleza`), `pix_key`, `settings` (JSONB), timestamps, soft delete.
-- Seed inicial: ICVB, PIX `50.208.029/0001-31`.
+- `id`, `name`, `short_name`, `slug` (unique), `timezone` (default `America/Fortaleza`), `pix_key`, `logo_path` (nullable), `settings` (JSONB), timestamps, soft delete.
+- Seed inicial: ICVB, PIX `50.208.029/0001-31`, `logo_path` nulo (usa marca Soli).
 
 **`users`**
 
@@ -151,7 +189,7 @@ Ações da Fase 2:
 - Listagem por ano/mês, filtro por status, busca por tema.
 - Gestão de usuários e papéis (`admin` apenas).
 - Recurso de **auditoria** (somente leitura): usuário, ação, model, dirty attributes, IP, data.
-- Igreja: edição do cadastro da ICVB (nome, PIX, timezone) pelo `admin`.
+- Igreja: edição do cadastro (nome, PIX, timezone) e **upload da logo** da congregação (`churches.logo_path`). Sem logo, o público continua com a marca Soli.
 
 Fluxo típico de setembro, ainda em agosto:
 
@@ -239,6 +277,7 @@ Acessos locais previstos:
 - Dados vêm do boletim publicado do mês vigente.
 - KPIs calculados no backend ou na view a partir das coleções.
 - Manter hover dos cards, navegação âncora e botão de copiar PIX (PIX vem de `churches.pix_key`).
+- Cabeçalho: logo da igreja ou placeholder Soli. Rodapé: só a Soli (marca + slogan).
 
 ---
 
@@ -248,14 +287,13 @@ Toda fase (e demanda relevante) ganha uma issue no GitHub e uma branch própria 
 
 **Branch:** o nome da feat **deve refletir o título da issue** (slug em minúsculas, hífen, sem acento).
 
-Formato: `<tipo>/<slug-do-titulo-da-issue>`
+Formato: `<tipo>/<numero-da-issue>-<slug-do-titulo-da-issue>`
 
 | Issue | Branch |
 | --- | --- |
-| [Fase 1 - Domínio do boletim + Home #2](https://github.com/emersonsimoes-dev/boletim-icvb/issues/2) | `feat/fase-1-boletim-home` |
-| Fase 0 - Bootstrap Docker | `feat/fase-0-bootstrap-docker` |
-| Fase 2 - Painel admin Filament | `feat/fase-2-admin-filament` |
-| Fase 3 - API v1 | `feat/fase-3-api-v1` |
+| [Fase 1 - Domínio do boletim + Home #2](https://github.com/emersonsimoes-dev/boletim-icvb/issues/2) | `feat/2-fase-1-boletim-home` |
+| Fase 2 - Painel admin Filament | `feat/<n>-fase-2-admin-filament` |
+| Fase 3 - API v1 | `feat/<n>-fase-3-api-v1` |
 
 A IA sugere a branch a partir do título da issue; não inventa outro slug.
 
@@ -289,24 +327,20 @@ Tipos usuais: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`, `build`.
 
 ## 11. Fases
 
-### Esta etapa (concluída por este arquivo)
-
-- `docs/PLANEJAMENTO.md` — diretrizes de início.
-
-### Fase 0 — Esqueleto
+### Fase 0 — Esqueleto (feita, sem issue no GitHub)
 
 - Laravel 13 + PHP 8.4 + Docker Compose (app, nginx, postgres:17, redis, mailpit, queue, scheduler).
 - `.env.example`, timezone `America/Fortaleza`.
-- README operacional: como subir, URLs, primeiro usuário.
-- Healthcheck básico.
+- README operacional: como subir, URLs, healthcheck.
 - Testes iniciais: home 200, `/up` 200, timezone Fortaleza (`tests/Feature/HealthTest.php`).
 
-### Fase 1 — Domínio do boletim + home
+### Fase 1 — Domínio do boletim + home (issue [#2](https://github.com/emersonsimoes-dev/boletim-icvb/issues/2), branch `feat/2-fase-1-boletim-home`)
 
-- Migrations e models da seção 4.
-- Seed da igreja ICVB + boletim agosto/2026 publicado.
-- Home pública dinâmica (Blade + CSS atual).
-- Testes unitários do mês vigente (incluindo 31/08 → 01/09 em Fortaleza) e feature da home com/sem boletim publicado.
+- Identidade do produto Soli (`config/soli.php`, marca em `public/images/soli/`).
+- Migrations e models da seção 4 (`churches.logo_path` nullable).
+- Seed da igreja ICVB (`logo_path` nulo → placeholder Soli) + boletim agosto/2026 publicado.
+- Home pública dinâmica (Blade + CSS do boletim): cabeçalho da igreja, rodapé só da Soli.
+- Testes unitários do mês vigente (incluindo 31/08 → 01/09 em Fortaleza) e feature da home (publicado, rascunho, virada de mês, placeholder vs logo da igreja, rodapé Soli).
 
 ### Fase 2 — Painel
 
@@ -315,6 +349,7 @@ Tipos usuais: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`, `build`.
 - Publicar / despublicar.
 - Papéis `admin` e `editor`.
 - Auditoria visível no painel.
+- Upload da logo da igreja/congregação.
 - Testes de publicação, permissão (`editor` vs `admin`) e registro de auditoria.
 
 ### Fase 3 — API e notas de produção
@@ -358,4 +393,6 @@ Tipos usuais: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`, `build`.
 
 ## 14. Próximo passo
 
-Com este documento aprovado, a implementação começa pela **Fase 0**: esqueleto Laravel 13 + Docker + PostgreSQL 17 + Redis, e README de bootstrap para outros devs.
+Fase 0 concluída (sem issue). Fase 1 na branch `feat/2-fase-1-boletim-home` (issue #2).
+
+Depois do merge da Fase 1: **Fase 2** — painel Filament em `/admin`, publicação do boletim e troca da logo da igreja.
