@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 88" fill="none" role="img" aria-label="Soli">
+  <g stroke="#F59E0B" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M45.4 22.6c0-7.5-5.5-12.4-13.2-12.4-8.5 0-14 5.8-14 13.2 0 12.6 28.6 9.8 28.6 22.6 0 7.8-6.2 13.2-14.8 13.2-8.7 0-14.4-5.5-14.8-13.2"/>
+    <path d="M20.6 24.4h22.8"/>
+    <path d="M25.2 24.4a6.8 6.8 0 0 1 13.6 0"/>
+    <path d="M32 12.2v4.4M26.6 14.1l1.7 3.6M37.4 14.1l-1.7 3.6M23.2 18.2l3.2 2.6M40.8 18.2l-3.2 2.6"/>
+  </g>
+  <text x="32" y="82" text-anchor="middle" fill="#F59E0B" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="700" letter-spacing="0.42em">SOLI</text>
+</svg>
