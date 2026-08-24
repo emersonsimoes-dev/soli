@@ -58,7 +58,7 @@ Toda fase deve manter `php artisan test` verde. Demandas novas entram com teste 
 
 Os testes rodam com `APP_ENV=testing` no banco **`icvb_test`** (Postgres separado). O banco de desenvolvimento `icvb` não é apagado. Cache, sessão e fila de teste usam `array`/`sync`, não o Redis da aplicação.
 
-Branch e commit de cada fase seguem Conventional Commits; a IA só sugere nome e mensagem — o responsável cria a branch e commita (ver [docs/PLANEJAMENTO.md](docs/PLANEJAMENTO.md) § 10).
+Branch e commit de cada fase seguem Conventional Commits, com o **slug do título da issue** (ex.: issue #2 → `feat/fase-1-boletim-home`). A IA só sugere; o responsável cria a branch e commita (ver [docs/PLANEJAMENTO.md](docs/PLANEJAMENTO.md) § 10).
 
 Dados do Postgres ficam no volume Docker `postgres_data`. `docker compose down -v` apaga o banco.
 

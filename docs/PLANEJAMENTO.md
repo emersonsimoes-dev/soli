@@ -244,25 +244,37 @@ Acessos locais previstos:
 
 ## 10. Git, branches e acordo
 
-Toda fase (e demanda relevante) ganha uma branch própria **antes** do merge em `main`. Nome da branch e mensagem de commit seguem [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/).
+Toda fase (e demanda relevante) ganha uma issue no GitHub e uma branch própria **antes** do merge em `main`. Nome da branch e mensagem de commit seguem [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/).
 
-**Branch:** `<tipo>/fase-<n>-<escopo-curto>`
+**Branch:** o nome da feat **deve refletir o título da issue** (slug em minúsculas, hífen, sem acento).
 
-Exemplos:
+Formato: `<tipo>/<slug-do-titulo-da-issue>`
 
-- `feat/fase-0-bootstrap-docker`
-- `feat/fase-1-boletim-home`
-- `feat/fase-2-admin-filament`
-- `feat/fase-3-api-v1`
-- `docs/fase-0-planejamento` (só documentação)
-- `fix/fase-1-virada-de-mes`
+| Issue | Branch |
+| --- | --- |
+| [Fase 1 - Domínio do boletim + Home #2](https://github.com/emersonsimoes-dev/boletim-icvb/issues/2) | `feat/fase-1-boletim-home` |
+| Fase 0 - Bootstrap Docker | `feat/fase-0-bootstrap-docker` |
+| Fase 2 - Painel admin Filament | `feat/fase-2-admin-filament` |
+| Fase 3 - API v1 | `feat/fase-3-api-v1` |
 
-**Commit:**
+A IA sugere a branch a partir do título da issue; não inventa outro slug.
+
+**Commit:** inclui a referência da issue no rodapé.
 
 ```text
 <tipo>(<escopo>): <descrição curta>
 
 [corpo opcional com o porquê]
+
+Refs: #<numero-da-issue>
+```
+
+Exemplo para a issue #2:
+
+```text
+feat(boletim): domínio do boletim e home do mês vigente
+
+Refs: #2
 ```
 
 Tipos usuais: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`, `build`.
@@ -270,7 +282,7 @@ Tipos usuais: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`, `build`.
 **Acordo obrigatório**
 
 - A IA **não** cria branch, **não** executa `git commit`, **não** faz `git push` e **não** abre PR por conta própria.
-- Ela **sugere** o nome da branch e a mensagem; o responsável confirma ou roda os comandos manualmente.
+- Ela **sugere** o nome da branch (com base na issue) e a mensagem; o responsável confirma ou roda os comandos manualmente.
 - Qualquer outra ação destrutiva ou de publicação (force push, merge, deploy) também espera acordo explícito.
 
 ---
