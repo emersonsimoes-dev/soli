@@ -14,7 +14,7 @@ class BulletinPolicy
 
     public function view(User $user, Bulletin $bulletin): bool
     {
-        return $user->isEditor() || $user->isAdmin();
+        return $user->canAccessChurch($bulletin->church_id);
     }
 
     public function create(User $user): bool
@@ -24,21 +24,21 @@ class BulletinPolicy
 
     public function update(User $user, Bulletin $bulletin): bool
     {
-        return $user->isEditor() || $user->isAdmin();
+        return $user->canAccessChurch($bulletin->church_id);
     }
 
     public function delete(User $user, Bulletin $bulletin): bool
     {
-        return $user->isEditor() || $user->isAdmin();
+        return $user->canAccessChurch($bulletin->church_id);
     }
 
     public function restore(User $user, Bulletin $bulletin): bool
     {
-        return $user->isAdmin();
+        return $user->isAdmin() && $user->canAccessChurch($bulletin->church_id);
     }
 
     public function forceDelete(User $user, Bulletin $bulletin): bool
     {
-        return $user->isAdmin();
+        return $user->isAdmin() && $user->canAccessChurch($bulletin->church_id);
     }
 }

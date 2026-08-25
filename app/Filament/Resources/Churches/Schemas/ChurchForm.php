@@ -60,6 +60,21 @@ class ChurchForm
                             ->maxLength(255)
                             ->columnSpanFull(),
                     ]),
+                Section::make('Contato')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('settings.contact.phone')
+                            ->label('Telefone')
+                            ->maxLength(255),
+                        TextInput::make('settings.contact.email')
+                            ->label('E-mail')
+                            ->email()
+                            ->maxLength(255),
+                        Textarea::make('settings.contact.address')
+                            ->label('Endereço')
+                            ->rows(2)
+                            ->columnSpanFull(),
+                    ]),
                 Section::make('Identidade visual')
                     ->schema([
                         FileUpload::make('logo_path')

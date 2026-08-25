@@ -109,4 +109,25 @@ class HomeBulletinTest extends TestCase
             ->assertSee('soli-footer', false)
             ->assertSee('SOLI');
     }
+
+    public function test_church_slug_url_shows_that_congregation_bulletin(): void
+    {
+        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-08-24 14:15:00', 'America/Fortaleza'));
+
+        $first = Church::factory()->create(['slug' => 'primeira', 'name' => 'Templo Primeiro']);
+        $second = Church::factory()->create(['slug' => 'segunda', 'name' => 'Templo Segundo']);
+        Bulletin::factory()->for($first)->published()->forMonth(2026, 8)->create(['theme' => 'Tema da primeira']);
+        Bulletin::factory()->for($second)->published()->forMonth(2026, 8)->create(['theme' => 'Tema da segunda']);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('Tema da primeira')
+            ->assertDontSee('Tema da segunda');
+
+        $this->get(route('church.home', $second))
+            ->assertOk()
+            ->assertSee('Tema da segunda')
+            ->assertSee('Templo Segundo')
+            ->assertDontSee('Tema da primeira');
+    }
 }

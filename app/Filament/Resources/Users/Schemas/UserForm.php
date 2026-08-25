@@ -34,7 +34,13 @@ class UserForm
                     ->multiple()
                     ->preload()
                     ->required()
-                    ->helperText('admin gerencia usuários; editor cuida dos boletins.'),
+                    ->helperText('admin gerencia usuários e todas as congregações; editor cuida do conteúdo das congregações atribuídas.'),
+                Select::make('churches')
+                    ->label('Congregações')
+                    ->relationship('churches', 'name')
+                    ->multiple()
+                    ->preload()
+                    ->helperText('Obrigatório para editores. Administradores já veem todas, mesmo sem vínculo.'),
             ]);
     }
 }

@@ -18,6 +18,8 @@ class ActivityResource extends Resource
 {
     protected static ?string $model = Activity::class;
 
+    protected static bool $isScopedToTenant = false;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
 
     protected static ?string $modelLabel = 'registro';

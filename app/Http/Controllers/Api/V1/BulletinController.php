@@ -7,26 +7,28 @@ use App\Http\Resources\Api\V1\BulletinResource;
 use App\Models\Bulletin;
 use App\Models\Church;
 use App\Services\BulletinReader;
+use App\Services\ChurchResolver;
 
 class BulletinController extends Controller
 {
-    public function current(BulletinReader $reader): BulletinResource
+    public function current(BulletinReader $reader, ChurchResolver $churches): BulletinResource
     {
-        return $this->respond($reader->publishedFor($this->church()));
+        return $this->respond($reader->publishedFor($churches->default()));
     }
 
-    public function show(int $year, int $month, BulletinReader $reader): BulletinResource
+    public function show(int $year, int $month, BulletinReader $reader, ChurchResolver $churches): BulletinResource
     {
-        return $this->respond($reader->publishedForPeriod($this->church(), $year, $month));
+        return $this->respond($reader->publishedForPeriod($churches->default(), $year, $month));
     }
 
-    private function church(): Church
+    public function currentForChurch(Church $church, BulletinReader $reader): BulletinResource
     {
-        $church = Church::query()->first();
+        return $this->respond($reader->publishedFor($church));
+    }
 
-        abort_unless($church, 404);
-
-        return $church;
+    public function showForChurch(Church $church, int $year, int $month, BulletinReader $reader): BulletinResource
+    {
+        return $this->respond($reader->publishedForPeriod($church, $year, $month));
     }
 
     private function respond(?Bulletin $bulletin): BulletinResource

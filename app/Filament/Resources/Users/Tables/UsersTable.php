@@ -25,6 +25,10 @@ class UsersTable
                 TextColumn::make('roles.name')
                     ->label('Papel')
                     ->badge(),
+                TextColumn::make('churches.short_name')
+                    ->label('Congregações')
+                    ->badge()
+                    ->placeholder('—'),
                 TextColumn::make('created_at')
                     ->label('Criado em')
                     ->dateTime('d/m/Y H:i')
