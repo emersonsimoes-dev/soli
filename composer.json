@@ -1,14 +1,17 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "icvb/boletim",
+    "name": "soli/soli",
     "type": "project",
-    "description": "Boletim mensal e gestão da Igreja Congregacional Vale da Benção.",
+    "description": "Soli \u2014 boletim e gest\u00e3o para igrejas.",
     "keywords": ["laravel", "framework"],
     "license": "MIT",
     "require": {
         "php": "^8.3",
+        "filament/filament": "^5.0",
         "laravel/framework": "^13.17",
-        "laravel/tinker": "^3.0"
+        "laravel/tinker": "^3.0",
+        "spatie/laravel-activitylog": "^4.0",
+        "spatie/laravel-permission": "^6.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -50,7 +53,8 @@
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-            "@php artisan package:discover --ansi"
+            "@php artisan package:discover --ansi",
+            "@php artisan filament:upgrade"
         ],
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force"

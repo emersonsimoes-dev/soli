@@ -28,12 +28,12 @@ RUN apt-get update \
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-COPY php.ini /usr/local/etc/php/conf.d/icvb.ini
-COPY entrypoint.sh /usr/local/bin/icvb-entrypoint
+COPY php.ini /usr/local/etc/php/conf.d/soli.ini
+COPY entrypoint.sh /usr/local/bin/soli-entrypoint
 
-RUN chmod +x /usr/local/bin/icvb-entrypoint
+RUN chmod +x /usr/local/bin/soli-entrypoint
 
 WORKDIR /var/www/html
 
-ENTRYPOINT ["icvb-entrypoint"]
+ENTRYPOINT ["soli-entrypoint"]
 CMD ["php-fpm"]

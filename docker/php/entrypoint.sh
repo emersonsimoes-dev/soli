@@ -24,4 +24,8 @@ if [ -f .env ] && grep -q '^APP_KEY=$' .env; then
     php artisan key:generate --force --no-interaction
 fi
 
+if [ ! -e public/storage ]; then
+    php artisan storage:link --no-interaction || true
+fi
+
 exec "$@"

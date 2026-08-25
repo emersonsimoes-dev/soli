@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsSoliActivity;
 use Database\Factories\ChurchFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\Storage;
 class Church extends Model
 {
     /** @use HasFactory<ChurchFactory> */
-    use HasFactory, SoftDeletes;
+    use HasFactory, LogsSoliActivity, SoftDeletes;
 
     protected function casts(): array
     {

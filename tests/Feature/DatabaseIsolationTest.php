@@ -14,8 +14,8 @@ class DatabaseIsolationTest extends TestCase
     {
         $this->assertSame('testing', app()->environment());
         $this->assertSame('pgsql', config('database.default'));
-        $this->assertSame('icvb_test', config('database.connections.pgsql.database'));
-        $this->assertSame('icvb_test', DB::connection()->getDatabaseName());
-        $this->assertNotSame('icvb', DB::connection()->getDatabaseName());
+        $this->assertSame('soli_test', config('database.connections.pgsql.database'));
+        $this->assertSame('soli_test', DB::connection()->getDatabaseName());
+        $this->assertNotSame('soli', DB::connection()->getDatabaseName());
     }
 }

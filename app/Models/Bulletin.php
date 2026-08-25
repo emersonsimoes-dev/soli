@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Enums\BulletinStatus;
+use App\Models\Concerns\LogsSoliActivity;
+use Carbon\CarbonImmutable;
 use Database\Factories\BulletinFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,7 +17,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Bulletin extends Model
 {
     /** @use HasFactory<BulletinFactory> */
-    use HasFactory, SoftDeletes;
+    use HasFactory, LogsSoliActivity, SoftDeletes;
 
     protected function casts(): array
     {
@@ -65,6 +67,39 @@ class Bulletin extends Model
     public function isPublished(): bool
     {
         return $this->status === BulletinStatus::Published;
+    }
+
+    public function publish(): void
+    {
+        $this->update([
+            'status' => BulletinStatus::Published,
+            'published_at' => $this->published_at ?? now('America/Fortaleza'),
+        ]);
+    }
+
+    public function unpublish(): void
+    {
+        $this->update([
+            'status' => BulletinStatus::Draft,
+            'published_at' => null,
+        ]);
+    }
+
+    public static function monthLabel(int $month): string
+    {
+        $label = CarbonImmutable::create(2000, $month, 1)->locale('pt_BR')->translatedFormat('F');
+
+        return mb_strtoupper(mb_substr($label, 0, 1)).mb_substr($label, 1);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public static function monthOptions(): array
+    {
+        return collect(range(1, 12))
+            ->mapWithKeys(fn (int $month) => [$month => self::monthLabel($month)])
+            ->all();
     }
 
     /**

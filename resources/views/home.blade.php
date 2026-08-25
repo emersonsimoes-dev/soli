@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>ICVB · Boletim Mensal</title>
+    <title>Soli · Boletim Mensal</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
@@ -48,9 +48,9 @@
 </head>
 <body>
     <main>
-        <p class="label">Fase 0</p>
-        <h1>ICVB no ar</h1>
-        <p>Igreja Congregacional Vale da Benção. O boletim mensal entra na Fase 1; o painel administrativo, na Fase 2.</p>
+        <p class="label">Soli</p>
+        <h1>Soli no ar</h1>
+        <p>Projeto Soli para igrejas. O boletim mensal entra na Fase 1; o painel administrativo, na Fase 2.</p>
         <p class="meta">Timezone: {{ config('app.timezone') }} · {{ now()->format('d/m/Y H:i') }}</p>
         <p class="meta"><a href="/up">Healthcheck /up</a></p>
     </main>
