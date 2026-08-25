@@ -4,6 +4,7 @@ namespace Tests\Feature\Admin;
 
 use App\Filament\Resources\Activities\Pages\ListActivities;
 use App\Filament\Resources\Bulletins\Pages\ListBulletins;
+use App\Filament\Resources\Churches\Pages\ListChurches;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -34,10 +35,12 @@ class AdminAccessTest extends TestCase
     public function test_editor_can_open_bulletins_and_audit_but_not_users(): void
     {
         $editor = $this->makeEditor();
+        $church = $this->tenantChurch();
 
         $this->actingAs($editor);
 
-        $this->get('/admin')->assertOk();
+        $this->get('/admin')->assertRedirect('/admin/'.$church->slug);
+        $this->get('/admin/'.$church->slug)->assertOk();
 
         Livewire::actingAs($editor)
             ->test(ListBulletins::class)
@@ -49,6 +52,10 @@ class AdminAccessTest extends TestCase
 
         Livewire::actingAs($editor)
             ->test(ListUsers::class)
+            ->assertForbidden();
+
+        Livewire::actingAs($editor)
+            ->test(ListChurches::class)
             ->assertForbidden();
     }
 

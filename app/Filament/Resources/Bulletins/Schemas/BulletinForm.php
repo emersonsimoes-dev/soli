@@ -3,9 +3,9 @@
 namespace App\Filament\Resources\Bulletins\Schemas;
 
 use App\Models\Bulletin;
-use App\Models\Church;
 use App\Rules\UniqueBulletinPeriod;
 use App\Support\CurrentMonth;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Repeater;
@@ -33,12 +33,6 @@ class BulletinForm
                     ->tabs([
                         Tab::make('Geral')
                             ->schema([
-                                Select::make('church_id')
-                                    ->label('Congregação')
-                                    ->relationship('church', 'name')
-                                    ->default(fn () => Church::query()->value('id'))
-                                    ->required()
-                                    ->preload(),
                                 TextInput::make('year')
                                     ->label('Ano')
                                     ->numeric()
@@ -51,17 +45,21 @@ class BulletinForm
                                     ->options(Bulletin::monthOptions())
                                     ->default($current->month)
                                     ->required()
-                                    ->rule(fn (Get $get, ?Bulletin $record) => new UniqueBulletinPeriod(
-                                        churchId: $get('church_id') ? (int) $get('church_id') : null,
-                                        year: $get('year') ? (int) $get('year') : null,
-                                        ignoreId: $record?->getKey(),
-                                    )),
+                                    ->rule(function (Get $get, ?Bulletin $record): UniqueBulletinPeriod {
+                                        $tenantId = Filament::getTenant()?->getKey();
+
+                                        return new UniqueBulletinPeriod(
+                                            churchId: $record?->church_id ?? ($tenantId !== null ? (int) $tenantId : null),
+                                            year: $get('year') ? (int) $get('year') : null,
+                                            ignoreId: $record?->getKey(),
+                                        );
+                                    }),
                                 TextInput::make('theme')
                                     ->label('Tema')
                                     ->maxLength(255)
                                     ->columnSpanFull(),
                             ])
-                            ->columns(3),
+                            ->columns(2),
                         Tab::make('Programação')
                             ->schema([
                                 Repeater::make('scheduleItems')

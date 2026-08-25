@@ -20,6 +20,8 @@ class ChurchResource extends Resource
 {
     protected static ?string $model = Church::class;
 
+    protected static bool $isScopedToTenant = false;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingLibrary;
 
     protected static ?string $recordTitleAttribute = 'name';

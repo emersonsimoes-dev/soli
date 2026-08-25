@@ -2,6 +2,8 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\EditChurchProfile;
+use App\Models\Church;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -35,6 +37,8 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::hex('#F59E0B'),
             ])
+            ->tenant(Church::class, slugAttribute: 'slug')
+            ->tenantProfile(EditChurchProfile::class)
             ->maxContentWidth(Width::SevenExtraLarge)
             ->sidebarCollapsibleOnDesktop()
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')

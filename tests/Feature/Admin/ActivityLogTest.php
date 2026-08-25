@@ -22,7 +22,7 @@ class ActivityLogTest extends TestCase
     public function test_publishing_a_bulletin_records_causer_changes_and_ip(): void
     {
         $editor = $this->makeEditor(['name' => 'Editora Ana']);
-        $bulletin = Bulletin::factory()->create([
+        $bulletin = Bulletin::factory()->for($this->tenantChurch())->create([
             'status' => BulletinStatus::Draft,
         ]);
 
@@ -52,7 +52,7 @@ class ActivityLogTest extends TestCase
     public function test_panel_publish_action_writes_an_audit_row(): void
     {
         $editor = $this->makeEditor();
-        $bulletin = Bulletin::factory()->create([
+        $bulletin = Bulletin::factory()->for($this->tenantChurch())->create([
             'status' => BulletinStatus::Draft,
         ]);
 
@@ -73,7 +73,7 @@ class ActivityLogTest extends TestCase
     public function test_editor_can_read_audit_but_cannot_mutate_logs(): void
     {
         $editor = $this->makeEditor();
-        $bulletin = Bulletin::factory()->create();
+        $bulletin = Bulletin::factory()->for($this->tenantChurch())->create();
         $bulletin->update(['theme' => 'Tema auditado']);
 
         Livewire::actingAs($editor)

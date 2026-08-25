@@ -2,7 +2,7 @@
 
 **Soli** (*Soli Deo Gloria* — glória somente a Deus) é o **projeto Soli para igrejas**: boletim, comunhão e gestão, com a identidade da congregação (nome do templo, logo, ministérios) controlada no painel.
 
-A Fase 1 entrega o boletim público do **mês vigente** (timezone `America/Fortaleza`). A Fase 2 entrega o painel `/admin`. A Fase 3 entrega a API pública `/api/v1` e as notas de produção.
+A Fase 1 entrega o boletim público do **mês vigente** (timezone `America/Fortaleza`). A Fase 2 entrega o painel `/admin`. A Fase 3 entrega a API `/api/v1`, notas de produção e o produto de gestão por congregação (tenancy, membros, escalas, finanças e avisos).
 
 Diretrizes completas: [docs/PLANEJAMENTO.md](docs/PLANEJAMENTO.md).
 
@@ -31,9 +31,11 @@ Se o `.env` já existir, pule o `cp`. O `key:generate` só precisa rodar uma vez
 | Serviço | URL |
 | --- | --- |
 | Site | http://localhost:8000 |
+| Site (congregação) | http://localhost:8000/{slug} (ex.: `/icvb`) |
 | Admin | http://localhost:8000/admin |
 | API (mês vigente) | http://localhost:8000/api/v1/bulletins/current |
 | API (mês específico) | http://localhost:8000/api/v1/bulletins/2026/8 |
+| API (por congregação) | http://localhost:8000/api/v1/churches/{slug}/bulletins/current |
 | Healthcheck | http://localhost:8000/up |
 | Mailpit (e-mail de dev) | http://localhost:8025 |
 | PostgreSQL | `localhost:15432` (user/senha/db: `soli` / `secret` / `soli`) |
@@ -79,31 +81,46 @@ docker compose exec app php artisan make:filament-user
 
 O primeiro usuário recebe o papel `admin` automaticamente. Os demais são criados no próprio painel, em **Usuários**.
 
+O `/admin` escolhe a congregação pelo slug (`/admin/icvb`). Administradores veem todas; editores só as atribuídas no cadastro do usuário.
+
 Papéis:
 
-- `admin` — boletins, congregação, usuários e auditoria
-- `editor` — boletins, congregação e consulta da auditoria (sem gerir usuários)
+- `admin` — todas as congregações, usuários, auditoria e cadastro de novas igrejas
+- `editor` — boletins, membros, escalas, finanças, avisos e o cadastro da própria congregação (sem gerir usuários nem criar igrejas)
+
+No menu da congregação dá para editar nome, logo, PIX, contato e ministérios (`settings` JSONB). Uploads da logo usam o disco `public`. O `storage:link` precisa existir para a logo aparecer no site.
 
 A auditoria registra criações, alterações, exclusões e publicações, com usuário, campos alterados, IP e user-agent. Os logs não podem ser editados nem apagados pela interface.
 
-Uploads da logo da congregação usam o disco `public`. O `storage:link` precisa existir para a logo aparecer no site.
-
 ## API v1
 
-Os GETs de boletim **publicado** são públicos (sem token). O Sanctum está instalado para o app autenticar depois; ainda não há rotas que exijam `Authorization`.
+Boletim publicado, avisos publicados, escalas futuras e o cadastro público da congregação **não exigem token**. Membros e finanças exigem `Authorization: Bearer` (Sanctum) e vínculo com a congregação (admin vê todas).
 
-| Método | Rota | Uso |
-| --- | --- | --- |
-| `GET` | `/api/v1/bulletins/current` | Boletim publicado do mês vigente em `America/Fortaleza` |
-| `GET` | `/api/v1/bulletins/{year}/{month}` | Boletim publicado de um mês específico (histórico) |
+Rotas sem slug usam a **primeira congregação** do banco (compatível com a Fase 3 parte 1). Prefira as rotas com `{slug}`.
 
-Resposta `200` em JSON (`data`): congregação (nome, PIX, logo), tema, programação, eventos, escalas, culto infantil, EBD, aniversariantes e KPIs derivados. Rascunho, mês inexistente ou mês inválido (fora de 1–12) devolvem `404`.
+| Método | Rota | Auth | Uso |
+| --- | --- | --- | --- |
+| `GET` | `/api/v1/churches` | pública | Lista congregações (slug, nome, logo, contato) |
+| `GET` | `/api/v1/churches/{slug}` | pública | Cadastro e `settings` da congregação |
+| `GET` | `/api/v1/bulletins/current` | pública | Boletim do mês vigente da primeira igreja |
+| `GET` | `/api/v1/bulletins/{year}/{month}` | pública | Boletim histórico da primeira igreja |
+| `GET` | `/api/v1/churches/{slug}/bulletins/current` | pública | Boletim do mês vigente da igreja |
+| `GET` | `/api/v1/churches/{slug}/bulletins/{year}/{month}` | pública | Boletim histórico da igreja |
+| `GET` | `/api/v1/churches/{slug}/announcements` | pública | Avisos publicados |
+| `GET` | `/api/v1/churches/{slug}/roster` | pública | Escalas a partir de hoje |
+| `GET` | `/api/v1/churches/{slug}/members` | Sanctum | Membros da congregação |
+| `GET` | `/api/v1/churches/{slug}/contributions` | Sanctum | Lançamentos financeiros (dízimo/oferta/outro) |
+
+Boletim: rascunho, mês inexistente ou mês inválido (fora de 1–12) devolvem `404`. Membros/finanças sem token: `401`. Token de quem não acessa aquela igreja: `403`.
+
+O app mobile **não entra neste repositório**; estes endpoints são o contrato para um cliente futuro.
 
 Exemplo:
 
 ```bash
-curl -s http://localhost:8000/api/v1/bulletins/current
-curl -s http://localhost:8000/api/v1/bulletins/2026/8
+curl -s http://localhost:8000/api/v1/churches/icvb/bulletins/current
+curl -s http://localhost:8000/api/v1/churches/icvb/announcements
+curl -s -H "Authorization: Bearer SEU_TOKEN" http://localhost:8000/api/v1/churches/icvb/members
 ```
 
 ## Produção
@@ -171,7 +188,7 @@ VPS + Docker Compose (self-hosted). Sem amarrar a nuvem paga. HTTPS no proxy, ba
 ## Stack desta fase
 
 - Laravel 13 / PHP 8.4-FPM
-- Filament 5 (`/admin`)
+- Filament 5 (`/admin`, tenancy por congregação)
 - Laravel Sanctum (tokens, pronto para o app)
 - Nginx
 - PostgreSQL 17

@@ -29,14 +29,13 @@ class BulletinPublishingTest extends TestCase
 
     public function test_editor_creates_bulletin_as_draft_with_children(): void
     {
-        $editor = $this->makeEditor();
         $church = Church::factory()->create();
+        $editor = $this->makeEditor(church: $church);
         Repeater::fake();
 
         Livewire::actingAs($editor)
             ->test(CreateBulletin::class)
             ->fillForm([
-                'church_id' => $church->id,
                 'year' => 2026,
                 'month' => 9,
                 'theme' => 'Setembro em fé',
@@ -54,6 +53,7 @@ class BulletinPublishingTest extends TestCase
         $bulletin = Bulletin::query()->where('theme', 'Setembro em fé')->first();
 
         $this->assertNotNull($bulletin);
+        $this->assertSame($church->id, $bulletin->church_id);
         $this->assertSame(BulletinStatus::Draft, $bulletin->status);
         $this->assertNull($bulletin->published_at);
         $this->assertTrue(
@@ -64,7 +64,7 @@ class BulletinPublishingTest extends TestCase
     public function test_editor_can_publish_and_unpublish_bulletin(): void
     {
         $editor = $this->makeEditor();
-        $bulletin = Bulletin::factory()->create([
+        $bulletin = Bulletin::factory()->for($this->tenantChurch())->create([
             'theme' => 'Rascunho de setembro',
             'status' => BulletinStatus::Draft,
             'year' => 2026,
@@ -92,8 +92,8 @@ class BulletinPublishingTest extends TestCase
     {
         CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-09-01 08:00:00', 'America/Fortaleza'));
 
-        $editor = $this->makeEditor();
         $church = Church::factory()->create(['slug' => 'icvb-setembro']);
+        $editor = $this->makeEditor(church: $church);
         $bulletin = Bulletin::factory()->for($church)->forMonth(2026, 9)->create([
             'theme' => 'Setembro publicado',
             'status' => BulletinStatus::Draft,
@@ -106,19 +106,22 @@ class BulletinPublishingTest extends TestCase
         $this->get(route('home'))
             ->assertOk()
             ->assertSee('Setembro publicado');
+
+        $this->get(route('church.home', $church))
+            ->assertOk()
+            ->assertSee('Setembro publicado');
     }
 
     public function test_rejects_second_bulletin_for_the_same_church_month(): void
     {
-        $editor = $this->makeEditor();
         $church = Church::factory()->create();
+        $editor = $this->makeEditor(church: $church);
         Bulletin::factory()->for($church)->forMonth(2026, 10)->create();
         Repeater::fake();
 
         Livewire::actingAs($editor)
             ->test(CreateBulletin::class)
             ->fillForm([
-                'church_id' => $church->id,
                 'year' => 2026,
                 'month' => 10,
                 'theme' => 'Duplicado',

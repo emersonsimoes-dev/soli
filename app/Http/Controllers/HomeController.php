@@ -9,9 +9,18 @@ use Illuminate\View\View;
 
 class HomeController extends Controller
 {
-    public function __invoke(BulletinReader $reader): View
+    public function home(BulletinReader $reader): View
     {
-        $church = Church::query()->first();
+        return $this->page($reader, Church::query()->orderBy('id')->first());
+    }
+
+    public function show(Church $church, BulletinReader $reader): View
+    {
+        return $this->page($reader, $church);
+    }
+
+    private function page(BulletinReader $reader, ?Church $church): View
+    {
         $current = CurrentMonth::in($church?->timezone);
         $bulletin = $church ? $reader->publishedFor($church) : null;
 
