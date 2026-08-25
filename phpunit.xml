@@ -19,6 +19,7 @@
     </source>
     <php>
         <env name="APP_ENV" value="testing" force="true"/>
+        <env name="APP_URL" value="http://localhost" force="true"/>
         <env name="APP_TIMEZONE" value="America/Fortaleza" force="true"/>
         <env name="APP_LOCALE" value="pt_BR" force="true"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file" force="true"/>
