@@ -7,6 +7,7 @@ use App\Models\Bulletin;
 use App\Models\Church;
 use App\Support\CurrentMonth;
 use Carbon\CarbonInterface;
+use Illuminate\Database\Eloquent\Builder;
 
 class BulletinReader
 {
@@ -16,19 +17,36 @@ class BulletinReader
             ? CurrentMonth::at($at, $church->timezone)
             : CurrentMonth::in($church->timezone);
 
-        return Bulletin::query()
-            ->where('church_id', $church->id)
+        return $this->publishedQuery($church)
             ->where('year', $current->year)
             ->where('month', $current->month)
+            ->first();
+    }
+
+    public function publishedForPeriod(Church $church, int $year, int $month): ?Bulletin
+    {
+        return $this->publishedQuery($church)
+            ->where('year', $year)
+            ->where('month', $month)
+            ->first();
+    }
+
+    /**
+     * @return Builder<Bulletin>
+     */
+    private function publishedQuery(Church $church): Builder
+    {
+        return Bulletin::query()
+            ->where('church_id', $church->id)
             ->where('status', BulletinStatus::Published)
             ->with([
+                'church',
                 'scheduleItems',
                 'specialEvents',
                 'serviceRosters',
                 'childrenMinistryRosters',
                 'ebdClasses',
                 'birthdays',
-            ])
-            ->first();
+            ]);
     }
 }
